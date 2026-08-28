@@ -16,8 +16,8 @@
   virtualisation = {
     graphics = true;
     memorySize = 4096;
-    cores = 4;
     diskSize = 20480;
+    qemu.options = [ "-smp 4" ];
   };
 
   system.stateVersion = "24.11";
