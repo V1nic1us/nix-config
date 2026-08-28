@@ -1,10 +1,13 @@
 {
   programs.git = {
     enable = true;
-    # Defina seus dados pessoais em modules/local.nix e importe-o em home.nix.
     extraConfig = {
+      user = {
+        name = "V1nic1us";
+        email = "marcusvinicius.mds16@gmail.com";
+      };
       init.defaultBranch = "main";
-      pull.rebase = true;
+      pull.rebase = false;
       push.autoSetupRemote = true;
     };
   };

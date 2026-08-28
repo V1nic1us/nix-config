@@ -14,6 +14,11 @@
     inherit username;
     homeDirectory = "/home/${username}";
 
+    file = {
+      ".face".source = ./assets/sunny-shadow-slave.png;
+      ".face.icon".source = ./assets/sunny-shadow-slave.png;
+    };
+
     # Não altere após a primeira aplicação sem consultar a documentação.
     stateVersion = "24.11";
   };
