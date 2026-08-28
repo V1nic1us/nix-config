@@ -62,5 +62,21 @@ Depois, aplique com `sudo nixos-rebuild switch --flake .#meu-host`. O nixpkgs
 atual fornece o módulo Plasma 6; ainda não existe uma opção `plasma7` para ser
 ativada.
 
+## Teste gráfico no QEMU
+
+O flake inclui a configuração temporária `desktop-vm`, que importa o módulo de
+desktop e o perfil Home Manager. Para construir e iniciar a VM sem alterar o
+sistema host, execute na raiz do repositório:
+
+```sh
+nixos-rebuild build-vm --flake .#desktop-vm
+./result/bin/run-nix-config-vm-vm
+```
+
+A tela de login do SDDM deve aparecer. Entre com o usuário `viniv` e a senha
+`nixos`; essas credenciais existem somente na imagem de teste. A VM recebe 4 GB
+de RAM, quatro núcleos e um disco descartável de 20 GB. Feche a janela do QEMU
+para encerrar o teste.
+
 Não coloque senhas, tokens ou chaves privadas neste repositório. Para segredos,
 adicione posteriormente uma solução como `sops-nix` ou `agenix`.

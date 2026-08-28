@@ -19,6 +19,24 @@
       # Importe este módulo na configuração NixOS de cada dispositivo.
       nixosModules.desktop = import ./modules/nixos/desktop.nix;
 
+      nixosConfigurations.desktop-vm = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit username; };
+        modules = [
+          ./modules/nixos/desktop.nix
+          ./modules/nixos/vm.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = { inherit username; };
+              users.${username} = import ./home.nix;
+            };
+          }
+        ];
+      };
+
       homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.${system};
         modules = [ ./home.nix ];
