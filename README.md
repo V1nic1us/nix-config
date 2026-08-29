@@ -78,5 +78,18 @@ A tela de login do SDDM deve aparecer. Entre com o usuário `viniv` e a senha
 de RAM, quatro núcleos e um disco descartável de 20 GB. Feche a janela do QEMU
 para encerrar o teste.
 
+### Instalação automatizada na ISO minimal
+
+Depois de clonar este repositório na ISO, execute somente:
+
+```sh
+cd nix-config
+sudo ./scripts/install-qemu.sh --yes
+```
+
+O script configura o teclado `br-abnt2`, apaga o disco virtual `/dev/vda`, cria
+e monta uma partição ext4 e instala o perfil `qemu-install`. Ele usa GRUB para
+inicializar no QEMU. O `--yes` é obrigatório porque o disco será apagado.
+
 Não coloque senhas, tokens ou chaves privadas neste repositório. Para segredos,
 adicione posteriormente uma solução como `sops-nix` ou `agenix`.
