@@ -80,16 +80,21 @@ para encerrar o teste.
 
 ### Instalação automatizada na ISO minimal
 
-Depois de clonar este repositório na ISO, execute somente:
+Depois de clonar este repositório na ISO, execute:
 
 ```sh
 cd nix-config
-sudo ./scripts/install-qemu.sh --yes
+sudo nix run github:nix-community/disko/latest#disko-install -- \
+  --flake .#qemu-install \
+  --disk main /dev/vda
 ```
 
-O script configura o teclado `br-abnt2`, apaga o disco virtual `/dev/vda`, cria
-e monta uma partição ext4 e instala o perfil `qemu-install`. Ele usa GRUB para
-inicializar no QEMU. O `--yes` é obrigatório porque o disco será apagado.
+O `disko-install` usa o layout declarativo em
+`modules/nixos/disk-config.nix`: apaga o disco informado, cria uma tabela GPT,
+uma partição de boot para o GRUB, uma partição ext4 para o sistema e uma swap de
+8 GiB. Substitua `/dev/vda` no comando se o disco de destino tiver outro nome.
+Confira o dispositivo com `lsblk` antes de executar, pois seu conteúdo será
+apagado.
 
 Não coloque senhas, tokens ou chaves privadas neste repositório. Para segredos,
 adicione posteriormente uma solução como `sops-nix` ou `agenix`.

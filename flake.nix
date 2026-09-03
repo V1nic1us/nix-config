@@ -3,13 +3,17 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, disko, home-manager, ... }:
     let
       system = "x86_64-linux";
       username = "viniv";
@@ -41,6 +45,8 @@
         inherit system;
         specialArgs = { inherit username; };
         modules = [
+          disko.nixosModules.disko
+          ./modules/nixos/disk-config.nix
           ./modules/nixos/desktop.nix
           ./modules/nixos/qemu-install.nix
           home-manager.nixosModules.home-manager
