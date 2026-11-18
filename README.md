@@ -2,8 +2,8 @@
 
 Configuração inicial com Nix Flakes e Home Manager para reproduzir o mesmo
 ambiente de usuário em vários dispositivos Linux. O perfil usa Kitty como
-terminal, instala Discord e Zed e inclui um módulo NixOS para o KDE Plasma 6 e
-Steam.
+terminal, instala Discord, Zed e btop e inclui um módulo NixOS para o KDE
+Plasma 6 e Steam.
 O idioma do sistema é inglês (`en_US.UTF-8`), com teclado brasileiro ABNT2.
 O KDE Plasma usa o tema escuro Breeze por padrão.
 
@@ -32,7 +32,7 @@ por uma unidade USB e execute `sudo bash install.sh` dentro dele.
 
 Digite `APAGAR` após conferir o resumo dos dispositivos. A instalação cria
 `viniv` com a senha solicitada, habilita KDE Plasma 6, SDDM, rede, áudio e
-Steam. O Home Manager instala Discord e Zed e configura
+Steam. O Home Manager instala Discord, Zed e btop e configura
 Git, Kitty, Zsh e Fastfetch. O instalador copia a configuração para
 `/etc/nixos`, onde ela pode ser atualizada com
 `sudo nixos-rebuild switch --flake /etc/nixos#portable`.

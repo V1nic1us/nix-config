@@ -19,6 +19,7 @@ let
 in
 {
   home.packages = [
+    pkgs.btop
     discord
     pkgs.zed-editor
   ];
