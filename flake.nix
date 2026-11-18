@@ -3,66 +3,51 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    disko = {
-      url = "github:nix-community/disko/latest";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, disko, home-manager, ... }:
+  outputs =
+    { nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
       username = "viniv";
-    in {
-      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt-rfc-style;
+      # Nesta revisão do nixpkgs, fetchurl recebe curl-dev, que não contém curl.
+      fetchurlCurlBin = final: prev: {
+        fetchurl = prev.fetchurl.override {
+          curl = nixpkgs.legacyPackages.${system}.curlMinimal.bin;
+        };
+      };
+      homePkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+        overlays = [ fetchurlCurlBin ];
+      };
+    in
+    {
+      formatter.${system} = nixpkgs.legacyPackages.${system}.nixfmt;
 
       # Importe este módulo na configuração NixOS de cada dispositivo.
       nixosModules.desktop = import ./modules/nixos/desktop.nix;
-
-      nixosConfigurations.desktop-vm = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit username; };
-        modules = [
+      nixosModules.portable = { ... }: {
+        nixpkgs.overlays = [ fetchurlCurlBin ];
+        imports = [
+          ./modules/nixos/portable.nix
           ./modules/nixos/desktop.nix
-          ./modules/nixos/vm.nix
           home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit username; };
-              users.${username} = import ./home.nix;
-            };
-          }
         ];
-      };
-
-      nixosConfigurations.qemu-install = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit username; };
-        modules = [
-          disko.nixosModules.disko
-          ./modules/nixos/disk-config.nix
-          ./modules/nixos/desktop.nix
-          ./modules/nixos/qemu-install.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit username; };
-              users.${username} = import ./home.nix;
-            };
-          }
-        ];
+        home-manager = {
+          useGlobalPkgs = true;
+          useUserPackages = true;
+          extraSpecialArgs = { inherit username; };
+          users.${username} = import ./home.nix;
+        };
       };
 
       homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = homePkgs;
         modules = [ ./home.nix ];
         extraSpecialArgs = { inherit username; };
       };

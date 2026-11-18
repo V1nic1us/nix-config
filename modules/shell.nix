@@ -6,7 +6,7 @@
     syntaxHighlighting.enable = true;
     shellAliases = {
       ll = "ls -lah";
-      nix-update = "home-manager switch --flake ~/nix-config";
+      nix-update = "if [ -f /etc/nixos/flake.nix ]; then sudo nixos-rebuild switch --flake /etc/nixos#portable; else home-manager switch --flake ~/nix-config#viniv; fi";
     };
   };
 }

@@ -1,7 +1,7 @@
 {
   programs.git = {
     enable = true;
-    extraConfig = {
+    settings = {
       user = {
         name = "V1nic1us";
         email = "marcusvinicius.mds16@gmail.com";

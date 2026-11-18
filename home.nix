@@ -1,7 +1,5 @@
 { username, ... }:
 {
-  nixpkgs.config.allowUnfree = true;
-
   imports = [
     ./modules/common.nix
     ./modules/fastfetch.nix

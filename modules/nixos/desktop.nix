@@ -8,6 +8,8 @@
   # O módulo disponível no nixpkgs atual é o Plasma 6.
   services = {
     desktopManager.plasma6.enable = true;
+    orca.enable = false;
+    speechd.enable = false;
     displayManager.sddm = {
       enable = true;
       wayland.enable = true;

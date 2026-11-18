@@ -2,7 +2,44 @@
 
 Configuração inicial com Nix Flakes e Home Manager para reproduzir o mesmo
 ambiente de usuário em vários dispositivos Linux. O perfil usa Kitty como
-terminal, instala Discord e inclui um módulo NixOS para o KDE Plasma 6 e Steam.
+terminal, instala Discord e Zed e inclui um módulo NixOS para o KDE Plasma 6 e Steam.
+
+## Instalação portátil (UEFI)
+
+O instalador `install.sh` pede a partição destinada ao NixOS e o tamanho do
+swap em GiB. Ele reutiliza a partição EFI FAT32 existente no mesmo disco,
+sem formatá-la. A partição do NixOS **é apagada** e formatada em ext4. É
+necessário deixar pelo menos 16 GiB além do tamanho escolhido para swap.
+O instalador exige uma única partição EFI nesse disco e uma ISO iniciada em
+modo UEFI. Se o disco ainda não tiver partições, crie a partição EFI e a
+partição do sistema antes de executar o instalador.
+
+Na ISO minimal oficial, conecte à internet e use esta versão do repositório.
+Se ela já estiver publicada no GitHub, execute:
+
+```sh
+git clone https://github.com/V1nic1us/nix-config.git
+cd nix-config
+sudo bash install.sh
+```
+
+Se ainda não estiver publicada, copie este diretório para a máquina de destino
+por uma unidade USB e execute `sudo bash install.sh` dentro dele.
+
+Digite `APAGAR` após conferir o resumo dos dispositivos. A instalação cria
+`viniv` com a senha solicitada, habilita KDE Plasma 6, SDDM, rede, áudio e
+Steam. O Home Manager instala Discord e Zed e configura
+Git, Kitty, Zsh e Fastfetch. O instalador copia a configuração para
+`/etc/nixos`, onde ela pode ser atualizada com
+`sudo nixos-rebuild switch --flake /etc/nixos#portable`.
+Durante a instalação, o registro fica em `/mnt/nix-config-install.log`;
+depois do reinício, em `/nix-config-install.log`.
+Quando o instalador terminar, remova a ISO e reinicie o computador.
+
+A senha inicial foi pedida pelo usuário para instalações repetidas. Troque-a
+após o primeiro login em cada computador com `passwd`, pois uma senha fixa é
+fraca para uso permanente. O instalador aplica a senha diretamente no sistema
+instalado; ela não é gravada na configuração Nix nem no Nix store.
 
 ## Primeiro uso
 
@@ -29,8 +66,8 @@ nix flake update
 # Verificar a configuração sem aplicá-la
 nix flake check
 
-# Formatar os arquivos
-nix fmt
+# Formatar os arquivos Nix
+nix fmt -- flake.nix home.nix modules/*.nix modules/nixos/*.nix
 ```
 
 Os pacotes compartilhados ficam em `modules/common.nix`. Preferências de Git e
@@ -61,101 +98,3 @@ o módulo deste flake na configuração de cada máquina NixOS:
 Depois, aplique com `sudo nixos-rebuild switch --flake .#meu-host`. O nixpkgs
 atual fornece o módulo Plasma 6; ainda não existe uma opção `plasma7` para ser
 ativada.
-
-## Teste gráfico no QEMU
-
-O flake inclui a configuração temporária `desktop-vm`, que importa o módulo de
-desktop e o perfil Home Manager. Para construir e iniciar a VM sem alterar o
-sistema host, execute na raiz do repositório:
-
-```sh
-nixos-rebuild build-vm --flake .#desktop-vm
-./result/bin/run-nix-config-vm-vm
-```
-
-A tela de login do SDDM deve aparecer. Entre com o usuário `viniv` e a senha
-`nixos`; essas credenciais existem somente na imagem de teste. A VM recebe 4 GB
-de RAM, quatro núcleos e um disco descartável de 20 GB. Feche a janela do QEMU
-para encerrar o teste.
-
-### Instalação automatizada na ISO minimal
-
-Este procedimento instala o perfil `qemu-install` a partir da ISO minimal do
-NixOS. A configuração atual usa GRUB em modo BIOS e foi preparada para uma VM
-QEMU com pelo menos 4 GiB de memória e um disco de 20 GiB ou maior.
-
-> **Atenção:** o Disko apaga completamente o disco indicado no comando. Não use
-> este procedimento em um disco que contenha arquivos que precisam ser
-> preservados.
-
-1. Baixe a ISO minimal na [página oficial do NixOS](https://nixos.org/download/),
-   conecte-a à VM e inicialize pelo modo BIOS legado.
-
-2. No terminal da ISO, configure o teclado brasileiro:
-
-   ```sh
-   loadkeys br-abnt2
-   ```
-
-3. Verifique a conexão com a internet. Em uma VM com rede cabeada virtual, o
-   DHCP normalmente é configurado automaticamente:
-
-   ```sh
-   ping -c 3 cache.nixos.org
-   ```
-
-4. Liste os dispositivos e identifique cuidadosamente o disco de destino:
-
-   ```sh
-   lsblk -o NAME,SIZE,TYPE,MOUNTPOINTS,MODEL
-   ```
-
-   No QEMU, ele normalmente aparece como `/dev/vda`. A mídia da ISO geralmente
-   aparece como `/dev/sr0` e não deve ser usada como destino. O disco precisa
-   ter mais de 8 GiB, pois a configuração reserva 8 GiB exclusivamente para
-   swap.
-
-5. Obtenha o Git temporariamente pelo Nix e clone este repositório:
-
-   ```sh
-   nix shell nixpkgs#git -c git clone \
-     https://github.com/V1nic1us/nix-config.git
-   cd nix-config
-   ```
-
-6. Confirme que o Flake pode ser avaliado antes de modificar o disco:
-
-   ```sh
-   nix flake check
-   ```
-
-7. Execute a instalação, substituindo `/dev/vda` se o passo 4 mostrou outro
-   disco:
-
-   ```sh
-   sudo nix run github:nix-community/disko/latest#disko-install -- \
-     --flake .#qemu-install \
-     --disk main /dev/vda
-   ```
-
-   O `disko-install` avalia o perfil, apaga e prepara o disco, monta os sistemas
-   de arquivos e instala o NixOS. Não é necessário executar `nixos-install`
-   separadamente.
-
-8. Quando a instalação terminar com a mensagem `disko-install succeeded`,
-   reinicie e remova a ISO da VM:
-
-   ```sh
-   reboot
-   ```
-
-Após iniciar pelo disco instalado, entre no SDDM com o usuário `viniv` e a
-senha `nixos`. Essas credenciais são destinadas somente ao ambiente de teste.
-
-O `disko-install` usa o layout declarativo em
-`modules/nixos/disk-config.nix`: apaga o disco informado, cria uma tabela GPT,
-uma partição de boot para o GRUB, uma partição ext4 para o sistema e uma swap de
-8 GiB.
-
-Não coloque senhas, tokens ou chaves privadas neste repositório. Para segredos,
-adicione posteriormente uma solução como `sops-nix` ou `agenix`.
