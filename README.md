@@ -9,16 +9,19 @@ O KDE Plasma usa o tema escuro Breeze por padrão.
 
 ## Instalação portátil (UEFI)
 
-O instalador `install.sh` pede a partição destinada ao NixOS e o tamanho do
-swap em GiB. Pressionar Enter usa 16 GiB; informar `0` desativa o swap. Ele
-reutiliza a partição EFI FAT32 existente no mesmo disco,
-sem formatá-la. A partição do NixOS **é apagada** e formatada em ext4. É
-necessário deixar pelo menos 16 GiB além do tamanho escolhido para swap.
-O instalador exige uma única partição EFI nesse disco e uma ISO iniciada em
-modo UEFI. Se o disco ainda não tiver partições, crie a partição EFI e a
-partição do sistema antes de executar o instalador.
+O `install.sh` encontra os SSDs e HDs internos. Se houver apenas um, ele o
+seleciona automaticamente; se houver vários, mostra uma lista e pede o número
+do disco. Depois pergunta o tamanho do swap em GiB: Enter usa 16 GiB e `0`
+desativa o swap.
 
-Na ISO minimal oficial, conecte à internet e execute:
+**O disco escolhido será apagado por inteiro.** Após mostrar o nome e o tamanho
+dele, o instalador exige que você digite `APAGAR`. Só então ele cria a tabela
+GPT, uma partição EFI FAT32 de 1 GiB e uma partição ext4 com o espaço restante.
+Use este fluxo apenas quando puder apagar todas as partições do disco escolhido;
+ele não preserva outro sistema instalado. É preciso iniciar a ISO em modo UEFI
+e ter espaço para o swap escolhido, mais 17 GiB para EFI e sistema.
+
+Na ISO minimal oficial, conecte à internet e execute uma linha por vez:
 
 ```sh
 git clone https://github.com/V1nic1us/nix-config.git
@@ -26,9 +29,17 @@ cd nix-config
 sudo bash install.sh
 ```
 
-Digite `APAGAR` após conferir o resumo dos dispositivos. A instalação cria
-`viniv` com a senha inicial descrita abaixo, habilita KDE Plasma 6, SDDM,
-rede, áudio e Steam. O Home Manager instala Discord, Zed e btop e configura
+Se o repositório já estiver clonado na ISO, atualize-o e execute o instalador:
+
+```sh
+cd ~/nix-config
+git pull
+sudo bash install.sh
+```
+
+Confira o disco listado antes de digitar `APAGAR`. A instalação cria `viniv`
+com a senha inicial descrita abaixo, habilita KDE Plasma 6, SDDM, rede, áudio
+e Steam. O Home Manager instala Discord, Zed e btop e configura
 Git, Kitty, Zsh e Fastfetch. O instalador copia a configuração para
 `/etc/nixos`, onde ela pode ser atualizada com
 `sudo nixos-rebuild switch --flake /etc/nixos#portable`.
