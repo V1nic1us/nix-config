@@ -3,6 +3,7 @@
 Configuração inicial com Nix Flakes e Home Manager para reproduzir o mesmo
 ambiente de usuário em vários dispositivos Linux. O perfil usa Kitty como
 terminal, instala Discord e Zed e inclui um módulo NixOS para o KDE Plasma 6 e Steam.
+O idioma do sistema é inglês (`en_US.UTF-8`), com teclado brasileiro ABNT2.
 
 ## Instalação portátil (UEFI)
 

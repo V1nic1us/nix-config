@@ -2,7 +2,7 @@
 {
   networking.networkmanager.enable = true;
   time.timeZone = "America/Boa_Vista";
-  i18n.defaultLocale = "pt_BR.UTF-8";
+  i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "br-abnt2";
   services.xserver.xkb.layout = "br";
   services.xserver.xkb.variant = "";
