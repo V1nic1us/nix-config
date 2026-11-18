@@ -2,13 +2,16 @@
 
 Configuração inicial com Nix Flakes e Home Manager para reproduzir o mesmo
 ambiente de usuário em vários dispositivos Linux. O perfil usa Kitty como
-terminal, instala Discord e Zed e inclui um módulo NixOS para o KDE Plasma 6 e Steam.
+terminal, instala Discord e Zed e inclui um módulo NixOS para o KDE Plasma 6 e
+Steam.
 O idioma do sistema é inglês (`en_US.UTF-8`), com teclado brasileiro ABNT2.
+O KDE Plasma usa o tema escuro Breeze por padrão.
 
 ## Instalação portátil (UEFI)
 
 O instalador `install.sh` pede a partição destinada ao NixOS e o tamanho do
-swap em GiB. Ele reutiliza a partição EFI FAT32 existente no mesmo disco,
+swap em GiB. Pressionar Enter usa 16 GiB; informar `0` desativa o swap. Ele
+reutiliza a partição EFI FAT32 existente no mesmo disco,
 sem formatá-la. A partição do NixOS **é apagada** e formatada em ext4. É
 necessário deixar pelo menos 16 GiB além do tamanho escolhido para swap.
 O instalador exige uma única partição EFI nesse disco e uma ISO iniciada em

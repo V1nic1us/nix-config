@@ -22,6 +22,11 @@
   };
 
   environment = {
+    etc."xdg/kdeglobals".source = "${pkgs.kdePackages.breeze}/share/color-schemes/BreezeDark.colors";
+    etc."xdg/plasmarc".text = ''
+      [Theme]
+      name=breeze-dark
+    '';
     systemPackages = [ pkgs.kitty ];
     sessionVariables.TERMINAL = "kitty";
   };

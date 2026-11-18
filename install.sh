@@ -48,7 +48,8 @@ if findmnt -rn -S "$esp_part" >/dev/null; then
   printf 'A partição EFI já está montada.\n' >&2
   exit 1
 fi
-read -r -p 'Swap em GiB (0 para desativar): ' swap_gib
+read -r -p 'Swap em GiB [16] (0 para desativar): ' swap_gib
+swap_gib=${swap_gib:-16}
 if [[ ! $swap_gib =~ ^(0|[1-9][0-9]*)$ ]] || (( swap_gib > 1024 )); then
   printf 'Informe um número inteiro de 0 a 1024 GiB.\n' >&2
   exit 1
