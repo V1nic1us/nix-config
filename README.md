@@ -58,6 +58,7 @@ instalado; ela não é gravada na configuração Nix nem no Nix store.
 ## Primeiro uso após a instalação
 
 O `install.sh` já instala o NixOS e aplica o Home Manager junto com o sistema.
+Os recursos `nix-command` e `flakes` ficam habilitados após a instalação.
 Depois de reiniciar e entrar como `viniv`, troque a senha inicial:
 
 ```sh

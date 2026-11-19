@@ -1,5 +1,10 @@
 { pkgs, ... }:
 {
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
   networking.networkmanager.enable = true;
   time.timeZone = "America/Boa_Vista";
   i18n.defaultLocale = "en_US.UTF-8";
