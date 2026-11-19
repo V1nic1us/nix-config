@@ -43,7 +43,10 @@ e Steam. O Home Manager instala Discord, Zed e btop e configura
 Git, Kitty, Zsh e Fastfetch. O instalador copia a configuração para
 `/etc/nixos`, onde ela pode ser atualizada com
 `sudo nixos-rebuild switch --flake /etc/nixos#portable`.
-Durante a instalação, o registro fica em `/mnt/nix-config-install.log`;
+O terminal mostra as cinco etapas e o tempo decorrido. Durante a etapa longa
+do NixOS, uma barra animada indica atividade e conta os itens copiados ou
+compilados; ela não representa uma porcentagem nem estima o tempo restante.
+O registro detalhado fica em `/mnt/nix-config-install.log`;
 depois do reinício, em `/nix-config-install.log`.
 Quando o instalador terminar, remova a ISO e reinicie o computador.
 

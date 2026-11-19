@@ -13,7 +13,7 @@ if [[ ! -d /sys/firmware/efi ]]; then
   printf 'Esta instalação exige inicialização UEFI. Reinicie a ISO em modo UEFI.\n' >&2
   exit 1
 fi
-for tool in lsblk parted partprobe udevadm mkfs.fat mkfs.ext4 mount mountpoint findmnt nix nixos-generate-config nixos-install nixos-enter mkswap swapon; do
+for tool in date grep lsblk parted partprobe udevadm mkfs.fat mkfs.ext4 mount mountpoint findmnt nix nixos-generate-config nixos-install nixos-enter mkswap swapon; do
   command -v "$tool" >/dev/null || { printf 'Comando ausente: %s\n' "$tool" >&2; exit 1; }
 done
 if ! mountpoint -q /iso; then
@@ -70,7 +70,9 @@ printf '\nATENÇÃO: TODAS as partições e dados de %s serão apagados.\n' "$di
 printf 'Será criada uma partição EFI FAT32 de 1 GiB e outra para o NixOS. Swap: %s GiB.\n' "$swap_gib"
 read -r -p 'Digite APAGAR para iniciar: ' confirmation
 [[ $confirmation == APAGAR ]] || { printf 'Instalação cancelada.\n'; exit 1; }
+export INSTALL_STARTED_AT=$(date +%s)
 
+printf '\nEtapa 1/5: preparando as partições.\n'
 parted -s "$disk" mklabel gpt
 parted -s "$disk" mkpart ESP fat32 1MiB 1025MiB
 parted -s "$disk" set 1 esp on
@@ -89,6 +91,7 @@ mount -t ext4 -- "$root_part" /mnt
 mkdir -p /mnt/boot
 mount -t vfat -- "$esp_part" /mnt/boot
 
+printf '\nEtapa 2/5: configurando o swap.\n'
 if (( swap_gib > 0 )); then
   dd if=/dev/zero of=/mnt/swapfile bs=1M count=$((swap_gib * 1024)) status=progress
   chmod 600 /mnt/swapfile
@@ -96,6 +99,7 @@ if (( swap_gib > 0 )); then
   swapon /mnt/swapfile
 fi
 
+printf '\nEtapa 3/5: gerando a configuração.\n'
 nixos-generate-config --root /mnt
 mkdir -p /mnt/etc/nixos/nix-config
 cp -a "$repo_dir"/flake.nix "$repo_dir"/home.nix "$repo_dir"/modules "$repo_dir"/assets /mnt/etc/nixos/nix-config/
@@ -139,10 +143,12 @@ chmod 600 /mnt/etc/nixos/configuration.nix
 
 nix flake lock /mnt/etc/nixos
 install_log=/mnt/nix-config-install.log
-printf 'Instalando o NixOS. Registro: %s\n' "$install_log"
-if ! nixos-install --flake /mnt/etc/nixos#portable --no-root-passwd --no-channel-copy > "$install_log" 2>&1; then
+printf '\nEtapa 4/5: instalando o NixOS. Registro: %s\n' "$install_log"
+if ! bash "$repo_dir/scripts/install-progress.sh" "$install_log" nixos-install --flake /mnt/etc/nixos#portable --no-root-passwd --no-channel-copy; then
   tail -n 50 "$install_log" >&2
   exit 1
 fi
+printf '\nEtapa 5/5: configurando o usuário.\n'
 printf '%s\n' 'viniv:vini16' | nixos-enter --root /mnt --command 'chpasswd'
-printf '\nInstalação concluída. Remova a ISO e reinicie. Usuário: viniv.\n'
+elapsed=$(( $(date +%s) - INSTALL_STARTED_AT ))
+printf '\nInstalação concluída em %02d:%02d:%02d. Remova a ISO e reinicie. Usuário: viniv.\n' "$((elapsed / 3600))" "$(((elapsed / 60) % 60))" "$((elapsed % 60))"
