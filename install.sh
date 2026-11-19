@@ -89,7 +89,7 @@ mkfs.fat -F 32 "$esp_part"
 mkfs.ext4 -F -- "$root_part"
 mount -t ext4 -- "$root_part" /mnt
 mkdir -p /mnt/boot
-mount -t vfat -- "$esp_part" /mnt/boot
+mount -t vfat -o fmask=0077,dmask=0077 -- "$esp_part" /mnt/boot
 
 printf '\nEtapa 2/5: configurando o swap.\n'
 if (( swap_gib > 0 )); then
@@ -101,6 +101,8 @@ fi
 
 printf '\nEtapa 3/5: gerando a configuração.\n'
 nixos-generate-config --root /mnt
+# Restringe a leitura do seed do systemd-boot na partição EFI.
+sed -i -e 's/fmask=0022/fmask=0077/g' -e 's/dmask=0022/dmask=0077/g' /mnt/etc/nixos/hardware-configuration.nix
 mkdir -p /mnt/etc/nixos/nix-config
 cp -a "$repo_dir"/flake.nix "$repo_dir"/home.nix "$repo_dir"/modules "$repo_dir"/assets /mnt/etc/nixos/nix-config/
 if [[ -f $repo_dir/flake.lock ]]; then
