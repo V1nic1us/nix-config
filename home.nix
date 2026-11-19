@@ -5,6 +5,7 @@
     ./modules/fastfetch.nix
     ./modules/git.nix
     ./modules/kitty.nix
+    ./modules/plasma.nix
     ./modules/shell.nix
   ];
 
